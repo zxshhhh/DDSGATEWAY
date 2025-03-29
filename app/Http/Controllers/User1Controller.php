@@ -2,86 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\Traits\ApiResponseTrait;
-use App\Models\User;
-use App\Services\User1Service;
+use Illuminate\Http\Response; 
+use Illuminate\Http\Request; 
+use App\Traits\ApiResponser; 
 use DB;
+use App\Services\User1Service; 
 
-class User1Controller extends Controller {
-    use ApiResponseTrait;
-    private $request;
+class User1Controller extends Controller
+{
+    use ApiResponser;
 
     /**
-     * The service to consume the User1 Microservice
-     * @var User1Service
-     */
+    * The service to consume the User1 Microservice
+    * @var User1Service
+    */
     public $user1Service;
 
     /**
-     * Create a new controller instance
-     * @param Request $request
-     * @param User1Service $user1Service
-     */
-    public function __construct(Request $request, User1Service $user1Service)
+    * Create a new controller instance
+    */
+    public function __construct(User1Service $user1Service)
     {
-        $this->request = $request;
         $this->user1Service = $user1Service;
     }
-    /**
-    * Return the list of users
-    * @return \Illuminate\Http\Response
-    */
 
+    /**
+    * Return the list of users from Site1
+    */
     public function index()
     {
-    //
         return $this->successResponse($this->user1Service->obtainUsers1());
     }
 
-    public function getUsers(){
-        $users = User::all();
-        return response()->json($users, 200);
+    public function getUsers()
+    {
+        
     }
 
-    public function add(Request $request) {
-        $rules = [
-            'username' => 'required|max:20',
-            'password' => 'required|max:20',
-            'gender' => 'required|in:Male,Female',
-        ];
-        $this->validate($request, $rules);
-        $user = User::create($request->all());
-        return response()->json($user, 201);
+    public function add(Request $request)
+    {
+        return $this->successResponse($this->user1Service->createUser1($request->all(), Response::HTTP_CREATED));
     }
 
-    public function show($id) {
-        $user = User::findOrFail($id);
-        return response()->json($user);
+    public function show($id)
+    {
+        return $this->successResponse($this->user1Service->obtainUser1($id)); 
     }
 
-    public function update(Request $request, $id) {
-        $rules = [
-            'username' => 'max:20',
-            'password' => 'max:20',
-            'gender' => 'in:Male,Female',
-        ];
-        $this->validate($request, $rules);
-        $user = User::findOrFail($id);
-        $user->fill($request->all());
-
-        if ($user->isClean()) {
-            return response()->json(['error' => 'At least one value must change'], 422);
-        }
-
-        $user->save();
-        return response()->json($user);
+    public function update(Request $request, $id)
+    {
+        return $this->successResponse($this->user1Service->editUser1($request->all(), $id));   
     }
 
-    public function delete($id) {
-        $user = User::findOrFail($id);
-        $user->delete();
-        return response()->json(['message' => 'User deleted successfully']);
+    public function delete($id)
+    {
+        return $this->successResponse($this->user1Service->deleteUser1($id));
     }
+
 }
+  
